@@ -2,14 +2,16 @@ import socket, os
 hote = ''
 port = 25565
 boucle = True
+clearconsole = "cls"
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.bind((hote, port))
 socket.listen(1)
-print("Attendez..")
+print("Attente de connection")
 
 client, infos_connexion = socket.accept()
+os.system(clearconsole)
 print("Connecté à : ",infos_connexion)
-print("\nMicrosoft Windows [Version 10.0.18362.295]\n(c) 2019 Microsoft Corporation. All rights reserved.\n")
+print("\nRemote Terminal [Version 1]\n(c) 2019 Coni. J ai mis aucun droit lol.\n")
 
 while boucle is True:
     whereiam = client.recv(1024)
@@ -18,9 +20,12 @@ while boucle is True:
 
     if commande == "closeserverclient":
         boucle = False
-    elif commande == "cls":
-        os.system("cls")
+    elif commande == clearconsole:
+        os.system(clearconsole)
     elif commande == "":
+        commande = " "
+    elif commande == "infoconnect":
+        print(infos_connexion)
         commande = " "
     commande = commande.encode()
     client.send(commande)
