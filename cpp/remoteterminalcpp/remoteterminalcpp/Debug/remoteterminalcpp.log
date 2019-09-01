@@ -1,0 +1,4 @@
+﻿  remoteterminalcpp.cpp
+C:\Users\coni\Documents\dev\remoteterminalpy\cpp\remoteterminalcpp\remoteterminalcpp\remoteterminalcpp.cpp(11,1): warning C4326:  return type of 'main' should be 'int' instead of 'void'
+C:\Users\coni\Documents\dev\remoteterminalpy\cpp\remoteterminalcpp\remoteterminalcpp\remoteterminalcpp.cpp(90,21): warning C4018:  '<': signed/unsigned mismatch
+  remoteterminalcpp.vcxproj -> C:\Users\coni\Documents\dev\remoteterminalpy\cpp\remoteterminalcpp\Debug\remoteterminalcpp.exe

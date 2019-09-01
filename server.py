@@ -15,7 +15,7 @@ print("\nRemote Terminal [Version 1]\n(c) 2019 Coni. J ai mis aucun droit lol.\n
 
 while boucle is True:
     whereiam = client.recv(1024).decode()
-    commande = input(whereiam+"salepute")
+    commande = input(whereiam)
 
     if commande == "closeserverclient":
         boucle = False
