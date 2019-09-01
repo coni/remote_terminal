@@ -14,9 +14,8 @@ print("Connecté à : ",infos_connexion)
 print("\nRemote Terminal [Version 1]\n(c) 2019 Coni. J ai mis aucun droit lol.\n")
 
 while boucle is True:
-    whereiam = client.recv(1024)
-    whereiam = whereiam.decode()
-    commande = input(whereiam+">")
+    whereiam = client.recv(1024).decode()
+    commande = input(whereiam+"salepute")
 
     if commande == "closeserverclient":
         boucle = False

