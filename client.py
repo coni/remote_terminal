@@ -1,6 +1,6 @@
 import socket, os, subprocess, time
 
-hote = "127.0.0.1"
+hote = "172.20.31.16"
 port = 25565
 clearconsole = "cls"
 nothing = " ".encode()
