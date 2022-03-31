@@ -15,7 +15,7 @@ def refresh_user(main_connexion):
     return clients_connectes
 
 def set_server():
-    return "server", None, "void"
+    return "server", [], "void"
 
 
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,7 +24,8 @@ connexion_principale.listen(5)
 print("Le serveur écoute à présent sur le port {}".format(port))
 
 
-target, target_socket, target_job = set_server()
+targets = []
+target, targets, target_job = set_server()
 clients_connectes = refresh_user(connexion_principale)
 
 while True:
@@ -36,7 +37,6 @@ while True:
             server_input = "close_server_client"
         if target_job == "remote_terminal":
             server_input = "close_remote_terminal"
-    
     server_action = server_input.split(" ")
 
     if target_job == "void":
@@ -71,19 +71,25 @@ while True:
             is_client = False
             if len(server_action) > 1:
                 if server_action[1] == "server":
-                    target, target_socket, target_job = set_server()
+                    target, targets, target_job = set_server()
 
                     is_client = True
+                elif server_action[1] == "all":
+                    target = "all"
+                    if clients_connectes:
+                        for i in range(len(clients_connectes)):
+                            targets.append(clients_connectes[i])
+                            target_job = "void"
+                            is_client = True
                 elif server_action[1] != "":
                     if clients_connectes:
                         for i in range(len(clients_connectes)):
                             if server_action[1] == clients_connectes[i].getpeername()[0]:
                                 target = server_action[1]
-                                target_socket = clients_connectes[i]
+                                targets = [clients_connectes[i]]
                                 target_job = "void"
 
                                 is_client = True
-                
                 if is_client == False:
                     print("Le client",server_action[1],"est introuvable\n")
             else:
@@ -91,18 +97,20 @@ while True:
 
         # envoies un message aux clients (c'est plus pour l'experimentation et la phase "beta")
         elif server_action[0] == "send":
-            if target_socket is not None:
-                target_socket.send(" ".join(server_action).encode())
-                verification = target_socket.recv(1024)
-                if verification.decode() == "":
-                    print("le client est deco\n")
-                    target, target_socket, target_job = set_server()
-            else:
-                print("target none\n")
+            for target_socket in targets:
+                if target_socket is not None:
+                    target_socket.send(" ".join(server_action).encode())
+                    verification = target_socket.recv(1024)
+                    if verification.decode() == "":
+                        print("le client est deco\n")
+                        target, targets, target_job = set_server()
+                else:
+                    print("target none\n")
 
         elif server_action[0] == "remote_terminal":
             target_job = "remote_terminal"
-            target_socket.send(b"remote_terminal")
+            for target_socket in targets:
+                target_socket.send(b"remote_terminal")
 
         elif server_action[0] == "close_server_client":
             for iencli in clients_connectes:
@@ -114,14 +122,16 @@ while True:
             # focus sur le terminal d'une adresse en particulier
             if server_action[0] == "close_remote_terminal":
                 target_job = "void"
-                target_socket.send(b"close_remote_terminal")
+                for target_socket in targets:
+                    target_socket.send(b"close_remote_terminal")
 
             elif server_action[0] == "download_from_server":
                 if len(server_action) > 1:
                     try:
                         le_fichier = open(server_action[1],"rb")
                         le_fichier_size = len(le_fichier.read())
-                        target_socket.send(server_action[0].encode()+b" "+str(le_fichier_size).encode()+b" "+server_action[1].encode())
+                        for target_socket in targets:
+                            target_socket.send(server_action[0].encode()+b" "+str(le_fichier_size).encode()+b" "+server_action[1].encode())
 
                         le_fichier.seek(0)
                         le_fichier_bytes = le_fichier.read(le_fichier_size)
@@ -132,40 +142,18 @@ while True:
                         print("Le fichier n'existe pas\n")
                 else:
                     print("vous n'avez tapez aucun nom de fichier\n")
-
-            elif server_action[0] == "download_from_target":
-                target_socket.send(server_input.encode())
-
-                if len(server_action) > 1:
-                    verification = target_socket.recv(1024)
-                    if verification.decode() != "file not found":
-                        verification = verification.decode().split(" ")
-
-                        downloading_file = open(verification[2],"wb")
-                        downloading_file_bytes = target_socket.recv(int(verification[1]))
-                        downloading_file.write(downloading_file_bytes)
-
-                        downloading_file.close()
-                        print("ok.\n")
-                    else:
-                        print(verification.decode()+"\n")
-                else:
-                    print("vous n'avez pas entrez de fichier")
-
-
             else:
                 if server_input == "":
                     server_input = " "
-
                 commande = server_input.encode()
-                target_socket.send(commande)
-                reponse = str(target_socket.recv(20000).decode("utf-8", errors="ignore"))
-                if reponse == "":
-                    print("le client est deco\n")
-                    target, target_socket, target_job = set_server()
-                else:
-                    print(reponse)
-                    
+                for target_socket in targets:
+                    target_socket.send(commande)
+                    reponse = str(target_socket.recv(20000).decode("utf-8", errors="ignore"))
+                    if reponse == "":
+                        print("le client est deco\n")
+                        target, targets, target_job = set_server()
+                    else:
+                        print(reponse)
         except ConnectionResetError:
             print("le client a deco\n")
-            target, target_socket, target_job = set_server()
+            target, targets, target_job = set_server()
